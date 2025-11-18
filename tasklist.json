@@ -1,0 +1,17 @@
+[
+    {
+        "completed": true,
+        "id": 1,
+        "name": "Finish the Task Manager app"
+    },
+    {
+        "completed": true,
+        "id": 2,
+        "name": "Polish the Task Manager"
+    },
+    {
+        "completed": false,
+        "id": 3,
+        "name": "Submit Task Manager Project to roadmap github"
+    }
+]
