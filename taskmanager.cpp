@@ -4,13 +4,22 @@
 #include "json.hpp"
 using json = nlohmann::json;
 
-struct Tasks
+enum state
 {
-    int id;
-    std::string name;
-    bool completed;
-}
-Task;
+    NOT_STARTED,
+    IN_PROGRESS,
+    COMPLETED
+};
+
+class Tasks
+{
+    public:
+        int id;
+        std::string name;
+        state taskstate;
+};
+
+Tasks task;
 
 json loadfromfile()
 {
@@ -57,22 +66,23 @@ int getnextID(json tasks_json)
 
 void AddTask(json& tasks_json)
 {
-    Tasks t;
 
     std::cout << "Enter the Task Name: ";
     std::cin.ignore();
-    std::getline(std::cin, t.name);
-    t.id = getnextID(tasks_json) + 1;
-    t.completed = false;
+    std::getline(std::cin, task.name);
+    task.id = getnextID(tasks_json) + 1;
+    task.taskstate = NOT_STARTED;
 
     json obj = 
     {
-        {"id", t.id},
-        {"name", t.name},
-        {"completed", t.completed}
+        {"id", task.id},
+        {"name", task.name},
+        {"status", NOT_STARTED}
     };
     tasks_json.push_back(obj);
     std::cout << "The task has been added.\n";
+    savetofile(tasks_json);
+
 }
 
 void PrintTasks(const json& tasks_json)
@@ -80,7 +90,22 @@ void PrintTasks(const json& tasks_json)
 
     for (const auto&task : tasks_json)
     {
-        std::cout << "ID: " << task["id"] << " | Name: " << task["name"] << " | Completed: " << (task["completed"] ? "Yes" : "No") << "\n";
+        std::string s;
+        switch (task["status"].get<int>())
+        {
+            case COMPLETED:
+                s = "Completed";
+                break;
+            case IN_PROGRESS:
+                s = "In Progress";
+                break;
+            case NOT_STARTED:
+                s = "Not Started";
+                break;
+            default:
+                s = "Unknown Status";
+        }
+        std::cout << "ID: " << task["id"] << " | Name: " << task["name"] << " | Status: " << s << "\n";
     }
 }
 
@@ -128,7 +153,7 @@ bool EditTask(json& tasks_json)
                 bool newStatus;
                 std::cout << "Enter the new completion status (0 for incomplete, 1 for complete): ";
                 std::cin >> newStatus;
-                task["completed"] = newStatus;
+                task["status"] = newStatus;
                 return true;
             }
         }
